@@ -7,13 +7,12 @@ dotenv.config();
 
 const peers = {};
 
-const Video = ({ roomId, peer,setId,id }) => {
+const Video = ({ roomId, peer }) => {
   const myVideoRef = useRef(null);
   const videoGridRef = useRef(null);
   const [myCamOn, setMyCamOn] = useState(false);
   const [myMicOn, setMyMicOn] = useState(false);
   const [myStream, setMyStream] = useState(null);
-  
   const socket = useContext(SocketContext);
 
   useEffect(() => {
@@ -29,11 +28,26 @@ const Video = ({ roomId, peer,setId,id }) => {
       .catch((err) => {
         switch (err.message) {
           case "Permission denied":
-            console.log('Permission denied')
+            console.log(
+              "Camera Permission denied . Try giving permission and refresh the page \n ",
+              {
+                style: {
+                  fontFamily: "Poppins",
+                },
+              }
+            );
             break;
           case "Requested device not found":
-            console.log('Requested device not found')
+            console.log(
+              "We couldn't reach your video/audio devices.Try reconnecting them back !",
+              {
+                style: {
+                  fontFamily: "Poppins",
+                },
+              }
+            );
             break;
+
           default:
             break;
         }
@@ -54,7 +68,7 @@ const Video = ({ roomId, peer,setId,id }) => {
         navigator.mediaDevices
           .getUserMedia({ audio: true, video: true })
           .then((stream) => {
-            const call = peer.call(userId, stream, { metadata: id });
+            const call = peer.call(userId, stream, { metadata: peer.id });
 
             console.log(`Call is ${call}`);
 
@@ -99,12 +113,16 @@ const Video = ({ roomId, peer,setId,id }) => {
         console.log(error);
         throw error;
       }
-      console.log('Someone just joined')
+      console.log("Someone just joined");
     });
 
     socket.on("user-disconnected", (userId) => {
       if (peers[userId]) peers[userId].close();
-      console.log('Someone just disconnected')
+      console.log("Someone just disconnected", {
+        style: {
+          fontFamily: "Poppins",
+        },
+      });
     });
 
     socket.on("video-off", (userId) => {
@@ -138,8 +156,7 @@ const Video = ({ roomId, peer,setId,id }) => {
     });
 
     peer.on("open", (id) => {
-      console.log("id",id);
-      setId(id)
+      console.log(id);
       socket.emit("join-room", roomId, id);
     });
 
@@ -190,19 +207,22 @@ const Video = ({ roomId, peer,setId,id }) => {
 
     if (myMicOn) {
       myStream.getAudioTracks()[0].enabled = false;
-      socket.emit("audio-off", id);
+      socket.emit("audio-off", peer.id);
       setMyMicOn((myMicOn) => !myMicOn);
     } else {
       myStream.getAudioTracks()[0].enabled = true;
-      socket.emit("audio-on", id);
+      socket.emit("audio-on", peer.id);
       setMyMicOn((myMicOn) => !myMicOn);
     }
   };
 
   const playStop = () => {
     if (!myStream) {
-      
-      console.log("Camera permission is denied.");
+      console.log("Camera permission is denied.", {
+        style: {
+          fontFamily: "Poppins",
+        },
+      });
       return;
     }
 
@@ -210,11 +230,11 @@ const Video = ({ roomId, peer,setId,id }) => {
 
     if (myCamOn) {
       myStream.getVideoTracks()[0].enabled = false;
-      socket.emit("video-off", id);
+      socket.emit("video-off", peer.id);
       setMyCamOn((myCamOn) => !myCamOn);
     } else {
       myStream.getVideoTracks()[0].enabled = true;
-      socket.emit("video-on", id);
+      socket.emit("video-on", peer.id);
       setMyCamOn((myCamOn) => !myCamOn);
     }
   };
@@ -226,7 +246,7 @@ const Video = ({ roomId, peer,setId,id }) => {
     >
       <video
         ref={myVideoRef}
-        id={id}
+        id={peer.id}
         autoPlay={true}
         className="rounded-md"
         poster="https://i.imgur.com/bGOuVkD.png"
