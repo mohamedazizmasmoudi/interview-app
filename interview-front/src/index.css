@@ -32,7 +32,9 @@ html {
 html {
   width: 100vw;
   height: 100vh;
-  background-color: black;
+  background-color: #1f2937;
+  background-blend-mode: screen;
+  overflow: inherit;
 }
 
 #graphic {

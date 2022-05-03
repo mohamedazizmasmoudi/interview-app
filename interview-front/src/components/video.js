@@ -2,6 +2,8 @@ import { useRef, useEffect, useContext, useState } from "react";
 import { SocketContext } from "../context/socket";
 import dotenv from "dotenv";
 import { MdVideocam, MdVideocamOff, MdMic, MdMicOff } from "react-icons/md";
+import { toast } from "react-toastify";
+import { ToastContainer } from "react-toastify";
 
 dotenv.config();
 
@@ -28,7 +30,7 @@ const Video = ({ roomId, peer }) => {
       .catch((err) => {
         switch (err.message) {
           case "Permission denied":
-            console.log(
+            toast.error(
               "Camera Permission denied . Try giving permission and refresh the page \n ",
               {
                 style: {
@@ -38,7 +40,7 @@ const Video = ({ roomId, peer }) => {
             );
             break;
           case "Requested device not found":
-            console.log(
+            toast.error(
               "We couldn't reach your video/audio devices.Try reconnecting them back !",
               {
                 style: {
@@ -113,12 +115,12 @@ const Video = ({ roomId, peer }) => {
         console.log(error);
         throw error;
       }
-      console.log("Someone just joined");
+      toast.dark("Someone just joined");
     });
 
     socket.on("user-disconnected", (userId) => {
       if (peers[userId]) peers[userId].close();
-      console.log("Someone just disconnected", {
+      toast.info("Someone just disconnected", {
         style: {
           fontFamily: "Poppins",
         },
@@ -218,7 +220,7 @@ const Video = ({ roomId, peer }) => {
 
   const playStop = () => {
     if (!myStream) {
-      console.log("Camera permission is denied.", {
+      toast.error("Camera permission is denied.", {
         style: {
           fontFamily: "Poppins",
         },
@@ -264,6 +266,7 @@ const Video = ({ roomId, peer }) => {
           <MdMicOff size={26} color={"white"} onClick={() => muteUnmute()} />
         )}
       </div>
+      <ToastContainer autoClose={3000} position={"bottom-right"} />
     </div>
   );
 };

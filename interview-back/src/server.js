@@ -1,18 +1,15 @@
 import express from "express";
 import idRouter from "./router/idRouter.js";
 import helmet from "helmet";
-// import morgan from "morgan";
 import http from "http";
 import cors from "cors";
 import * as io from "socket.io";
-import { ExpressPeerServer } from "peer";
-import connectDb from "./db/config.js";
+import fetch from "node-fetch";
 import { nanoid } from "nanoid";
+import connectDb from "./db/config.js";
+import { ExpressPeerServer } from "peer";
 
 const app = express();
-
-const customGenerationFunction = () => (Math.random().toString(36) + '0000000000000000000').substr(2, 16);
-
 const server = http.createServer(app);
 var options = {
   debug: true,
@@ -20,8 +17,6 @@ var options = {
 };
 
 var peerServer = ExpressPeerServer(server, options);
-
-app.use('/peerjs/id', peerServer);
 
 const io_server = new io.Server(server, {
   cors: {
@@ -31,7 +26,6 @@ const io_server = new io.Server(server, {
 
 const PORT = process.env.PORT || 5000;
 
-// app.use(morgan("tiny"));
 app.use(
   cors({
     credentials: false,
@@ -39,6 +33,7 @@ app.use(
 );
 app.use(helmet());
 app.use(express.json());
+app.use("/peerJs", peerServer);
 
 // Connect to the Database
 try {
@@ -49,7 +44,34 @@ try {
 
 app.use("/id", idRouter);
 app.get("/:roomId", (req, res) => {
-  res.redirect(`/${req.query.roomId}`);
+  res.redirect(`/${roomId}`);
+});
+
+app.post("/exec", async (req, res) => {
+  const data = req.body;
+  console.log("this is", JSON.stringify(data));
+
+  fetch("https://onecompiler.com/api/code/exec", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+  })
+    .then((r) => r.json())
+    .then((data) => {
+      console.log(data);
+      return res.json({
+        exception: data.exception,
+        stdout: data.stdout,
+        stderr: data.stderr,
+        executionTime: data.executionTime,
+      });
+    })
+    .catch((err) => {
+      console.error(err);
+      res.status(500).send(err);
+    });
 });
 
 io_server.on("connection", (socket) => {
@@ -58,6 +80,15 @@ io_server.on("connection", (socket) => {
     socket.join(roomId);
     // socket.to(roomId).broadcast.emit("user-connected", userId);
     socket.broadcast.to(roomId).emit("user-connected", userId);
+
+    socket.on("drawing-data", (data) => {
+      // console.log(data);
+      socket.broadcast.to(roomId).emit("receive-drawing-data", data);
+    });
+
+    socket.on("editor-changes", (data) => {
+      socket.broadcast.to(roomId).emit("receive-editor-data", data);
+    });
 
     socket.on("video-off", (uId) => {
       socket.broadcast.to(roomId).emit("video-off", uId);
