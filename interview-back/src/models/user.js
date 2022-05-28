@@ -25,11 +25,6 @@ const userSchema = new mongoose.Schema({
     default: Date.now,
   },
   updated: Date,
-  favoriteFilm: [
-    {
-      type: String,
-    },
-  ],
   role: {
     type: String,
     default: "subscriber",

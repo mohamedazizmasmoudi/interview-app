@@ -87,8 +87,8 @@ authRoutes.post("/signin", (request, res, next) => {
         process.env.JWT_SECRET
       );
       res.cookie("t", token, { expire: new Date() + 9999 });
-      const { _id, name, email, role, favoriteFilm } = user;
-      return res.json({ token, user: { _id, email, name, role, favoriteFilm } });
+      const { _id, name, email } = user;
+      return res.json({ token, user: { _id, email, name } });
     });
   });
 
