@@ -1,5 +1,6 @@
 import express from "express";
 import idRouter from "./router/idRouter.js";
+import authRoutes from "./router/auth.js";
 import helmet from "helmet";
 import http from "http";
 import cors from "cors";
@@ -8,6 +9,10 @@ import fetch from "node-fetch";
 import { nanoid } from "nanoid";
 import connectDb from "./db/config.js";
 import { ExpressPeerServer } from "peer";
+import bodyParser from "body-parser";
+import expressValidator from "express-validator";
+
+
 
 const app = express();
 const server = http.createServer(app);
@@ -31,6 +36,9 @@ app.use(
     credentials: false,
   })
 );
+app.use(bodyParser.json());
+app.use(expressValidator());
+app.use("/api", authRoutes);
 app.use(helmet());
 app.use(express.json());
 app.use("/peerJs", peerServer);

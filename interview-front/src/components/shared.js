@@ -54,7 +54,7 @@ const SharedContent = ({ isBoardActive, setBoardActive }) => {
   socket.on("receive-editor-data", throttle(handleReceivedEditorData, 1000));
 
   const handleChange = (change) => {
-    console.log("Sending");
+    console.log("Sending",change.getSaveData());
     socket.emit("drawing-data", change.getSaveData());
   };
 

@@ -13,6 +13,9 @@ import { BsPlusSquare } from "react-icons/bs";
 import { AiFillInfoCircle } from "react-icons/ai";
 import { HiClipboardCopy } from "react-icons/hi";
 import "reactjs-popup/dist/index.css";
+import logout from "./img/logout.png";
+import { Button } from "reactstrap";
+import { MdExitToApp } from "react-icons/md";
 
 dotenv.config();
 
@@ -22,6 +25,7 @@ const Rootpage = () => {
   const meetRef = useRef(null);
   const [newId, setId] = useState("");
   const history = useHistory();
+  const [state, setState] = useState(false);
 
   const validateMeet = async (meetId) => {
     try {
@@ -105,10 +109,14 @@ const Rootpage = () => {
     }
     setLoading(false);
   };
+  function handleLogout() {
+    localStorage.setItem("tokenmovieapp", "");
+    window.location.href = "/";
+  }
   return (
     <div className="w-screen overflow-auto" id="main-container">
       <div className="leading-normal tracking-normal text-indigo-400 bg-bg bg-center w-full h-full font-body ">
-        <div className="w-full container mx-auto p-5">
+        <div className="flex flex-row w-full container mx-auto p-5" >
           <div className="w-full flex items-center justify-start">
             <a
               className="flex items-center text-indigo-400 no-underline hover:no-underline font-bold text-2xl lg:text-4xl"
@@ -120,6 +128,22 @@ const Rootpage = () => {
               </span>
             </a>
           </div>
+
+      <div className="flex flex-row">
+          <button
+            className={`text-white w-26 px-2 py-2 bg-red-500	rounded-lg transition duration-500 ease-in-out transform hover:-translate-y-1 hover:scale-100  `}
+            onClick={() => {
+              console.log("Leaving the room");
+              localStorage.setItem("tokenpeerjsapp", "");
+              window.location.href = "/";
+            }}
+          >
+            <span className="flex flex-row items-center justify-center gap-x-2">
+              <MdExitToApp size={20} />
+              Logout
+            </span>
+          </button>
+        </div>
         </div>
 
         <div className="container p-8 mx-auto flex flex-wrap flex-center flex-col md:flex-row items-center" style={{justifyContent:"center"}}>
